@@ -1,9 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef} from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import 'katex/dist/katex.min.css';
 
 const PDFAnalyzerFront = () => {
     const [pdfText, setPdfText] = useState('');
@@ -17,7 +14,35 @@ const PDFAnalyzerFront = () => {
     const fileInputRef = useRef(null);
 
     const handleFileUpload = async (e) => {
-        // ... 保持原有文件上传逻辑不变 ...
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setIsLoading(true);
+        setPdfText('');
+        setAnalysisResult('');
+
+        try {
+
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfjsLib = window.pdfjsLib;
+            const loadingTask = pdfjsLib.getDocument(arrayBuffer);
+            const pdf = await loadingTask.promise;
+
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                fullText += textContent.items.map(item => item.str).join(' ') + '\n';
+            }
+
+            setPdfText(fullText);
+            await analyzePDF(fullText);
+        } catch (error) {
+            console.error('Error parsing PDF:', error);
+            alert('Error parsing PDF. Please try another file.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const analyzePDF = async (text) => {
@@ -33,17 +58,67 @@ const PDFAnalyzerFront = () => {
 3. 评估结果、绩效指标和比较结果。
 4. 根据分析提供结构化的结论。
 
-请使用Markdown格式返回结果，特别是:
-- 数学公式使用KaTeX语法，行内公式用$...$，块级公式用$$...$$
-- 表格使用Markdown表格语法
-- 代码块使用\`\`\`语法
-
 用户偏好:
 - 主要领域: ${preferences.domainPriority || 'not specified'}
 - 方法偏好: ${preferences.methodPreference || 'not specified'}
 - 实验效果阈值: ${preferences.performanceThreshold || 'not specified'}`;
 
-            // ... 保持原有API调用逻辑不变 ...
+            // 直接在前端调用OpenAI API
+            const response = await fetch(process.env.REACT_APP_OPENAI_BASE_URL + "/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+                    "X-Failover-Enabled": "true"
+                },
+                body: JSON.stringify({
+                    model: "QwQ-32B",
+                    stream: true,
+                    max_tokens: 2147483647,
+                    temperature: 1,
+                    top_p: 0.2,
+                    top_k: 50,
+                    frequency_penalty: 0,
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: `分析这些论文信息:\n\n${text}` }
+                    ],
+                })
+            });
+
+            if (!response.ok) throw new Error('Analysis failed');
+            if (!response.body) throw new Error('ReadableStream not supported');
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let result = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+                for (const line of lines) {
+                    if (line === 'data: [DONE]') {
+                        break;
+                    }
+
+                    if (line.startsWith('data: ')) {
+                        const data = line.substring(6);
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (parsed.choices?.[0]?.delta?.content) {
+                                result += parsed.choices[0].delta.content;
+                                setAnalysisResult(result);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing JSON:', e);
+                        }
+                    }
+                }
+            }
         } catch (error) {
             console.error('Error analyzing PDF:', error);
             setAnalysisResult('```\nError analyzing PDF. Please try again.\n```');
@@ -52,7 +127,17 @@ const PDFAnalyzerFront = () => {
         }
     };
 
-    // ... 保持其他函数不变 ...
+    const handlePreferenceChange = (e) => {
+        const { name, value } = e.target;
+        setPreferences(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const triggerFileInput = () => {
+        fileInputRef.current.click();
+    };
 
     return (
         <div className="pdf-analyzer-container">
@@ -121,10 +206,7 @@ const PDFAnalyzerFront = () => {
                 <div className="analysis-result">
                     <h3>分析结果</h3>
                     <div className="markdown-content">
-                        <ReactMarkdown 
-                            remarkPlugins={[remarkGfm, remarkMath]}
-                            rehypePlugins={[rehypeKatex]}
-                        >
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {analysisResult}
                         </ReactMarkdown>
                     </div>
@@ -237,16 +319,6 @@ const PDFAnalyzerFront = () => {
                     padding-left: 15px;
                     color: #666;
                     margin-left: 0;
-                }
-                
-                .markdown-content .katex {
-                    font-size: 1.1em;
-                }
-                
-                .markdown-content .katex-display {
-                    margin: 1em 0;
-                    overflow-x: auto;
-                    overflow-y: hidden;
                 }
                 
                 .loading {
