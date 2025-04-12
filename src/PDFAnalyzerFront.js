@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef} from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-const PDFAnalyzer_front = () => {
+const PDFAnalyzerFront = () => {
     const [pdfText, setPdfText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [analysisResult, setAnalysisResult] = useState('');
@@ -332,4 +332,4 @@ const PDFAnalyzer_front = () => {
     );
 };
 
-export default PDFAnalyzer_front;
+export default PDFAnalyzerFront;

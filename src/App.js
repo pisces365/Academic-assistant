@@ -1,12 +1,12 @@
 import React from 'react';
 import PDFAnalyzer from './PDFAnalyzer';
 import './App.css';
-import PDFAnalyzer_front from "./PDFAnalyzer_front";
+import PDFAnalyzerFront from "./PDFAnalyzerFront";
 
 function App() {
   return (
       <div className="App">
-        <PDFAnalyzer_front />
+        <PDFAnalyzerFront />
       </div>
   );
 }
