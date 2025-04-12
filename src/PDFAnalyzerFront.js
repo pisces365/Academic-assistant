@@ -64,11 +64,11 @@ const PDFAnalyzerFront = () => {
 - 实验效果阈值: ${preferences.performanceThreshold || 'not specified'}`;
 
             // 直接在前端调用OpenAI API
-            const response = await fetch(import.meta.env.VITE_OPENAI_BASE_URL + "/v1/chat/completions", {
+            const response = await fetch(import.meta.env.OPENAI_BASE_URL + "/v1/chat/completions", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+                    "Authorization": `Bearer ${import.meta.env.OPENAI_API_KEY}`,
                     "X-Failover-Enabled": "true"
                 },
                 body: JSON.stringify({
