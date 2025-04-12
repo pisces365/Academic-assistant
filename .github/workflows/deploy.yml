@@ -20,8 +20,8 @@ jobs:
 
       - name: Build with environment variables
         env:
-          VITE_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          VITE_OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+          REACT_APP_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          REACT_APP_OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
         run: npm run build
 
       - name: Deploy to GitHub Pages
