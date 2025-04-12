@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef} from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -84,7 +84,7 @@ const PDFAnalyzer = () => {
                         try {
                             const parsed = JSON.parse(data);
                             if (parsed.content) {
-                                result += parsed.content;
+                                // result += parsed.content;
                                 setAnalysisResult(prev => prev + parsed.content);
                             }
                         } catch (e) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import PDFAnalyzer from './PDFAnalyzer';
+// import PDFAnalyzer from './PDFAnalyzer';
 import './App.css';
 import PDFAnalyzerFront from "./PDFAnalyzerFront";
 
