@@ -74,7 +74,7 @@ const PDFAnalyzerFront = () => {
                 body: JSON.stringify({
                     model: "QwQ-32B",
                     stream: true,
-                    max_tokens: 2147483647,
+                    max_tokens: 32768,
                     temperature: 1,
                     top_p: 0.2,
                     top_k: 50,
