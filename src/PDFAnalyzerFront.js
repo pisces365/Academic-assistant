@@ -64,7 +64,7 @@ const PDFAnalyzerFront = () => {
 - 实验效果阈值: ${preferences.performanceThreshold || 'not specified'}`;
 
             // 直接在前端调用OpenAI API
-            const response = await fetch(process.env.REACT_APP_OPENAI_BASE_URL + "/v1", {
+            const response = await fetch(process.env.REACT_APP_OPENAI_BASE_URL + "/v1/chat/completions", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
